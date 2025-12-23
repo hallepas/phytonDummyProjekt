@@ -42,13 +42,65 @@
     <!-- Add recipe form -->
     <div class="todo-form">
         <h3>Neues Rezept hinzufügen</h3>
-        <form action="{{ url_for('rezepte_page') }}" method="POST">
+        <form action="{{ url_for('rezepte_page') }}" method="POST" id="addRecipeForm">
             <div class="form-group">
                 <label for="name">Rezeptname</label>
                 <input type="text" id="name" name="name" class="form-control"
                        placeholder="z.B. Spaghetti Bolognese" required />
             </div>
-            <button type="submit" class="btn btn-primary">Rezept hinzufügen</button>
+            <div class="form-group">
+                <label for="description">Beschreibung</label>
+                <textarea id="description" name="description" class="form-control" rows="3"
+                          placeholder="Kurze Beschreibung des Rezepts..."></textarea>
+            </div>
+            
+            <h4>Zutaten</h4>
+            <div id="zutatenContainer">
+                <div class="zutat-row" style="margin-bottom: 10px;">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <input type="text" name="zutat_name_0" class="form-control" placeholder="Zutat (z.B. Tomaten)">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" name="zutat_number_0" class="form-control" placeholder="Menge">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" name="zutat_einheit_0" class="form-control" placeholder="Einheit (z.B. g)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="button" class="btn btn-default" onclick="addZutatRow()">+ Weitere Zutat</button>
+            <button type="submit" class="btn btn-primary" style="margin-left: 10px;">Rezept hinzufügen</button>
         </form>
     </div>
+
+    <script>
+        let zutatCount = 1;
+        function addZutatRow() {
+            const container = document.getElementById('zutatenContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'zutat-row';
+            newRow.style.marginBottom = '10px';
+            newRow.innerHTML = `
+                <div class="row">
+                    <div class="col-md-5">
+                        <input type="text" name="zutat_name_${zutatCount}" class="form-control" placeholder="Zutat">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" name="zutat_number_${zutatCount}" class="form-control" placeholder="Menge">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" name="zutat_einheit_${zutatCount}" class="form-control" placeholder="Einheit">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(newRow);
+            zutatCount++;
+        }
+    </script>
 {% endblock %}

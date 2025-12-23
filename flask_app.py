@@ -120,7 +120,29 @@ def rezepte_page():
     # POST - Add new recipe
     if request.method == "POST":
         name = request.form["name"]
-        db_write("INSERT INTO rezepte (user_id, name) VALUES (%s, %s)", (current_user.id, name, ))
+        description = request.form.get("description", "")
+        
+        # Insert recipe first
+        db_write("INSERT INTO rezepte (user_id, name, description) VALUES (%s, %s, %s)", (current_user.id, name, description))
+        
+        # Get the ID of the newly created recipe
+        new_rezept = db_read("SELECT id FROM rezepte WHERE user_id=%s AND name=%s ORDER BY id DESC LIMIT 1", (current_user.id, name), single=True)
+        
+        if new_rezept:
+            rezept_id = new_rezept["id"]
+            
+            # Add ingredients if provided
+            zutat_count = 0
+            while f"zutat_name_{zutat_count}" in request.form:
+                zutat_name = request.form.get(f"zutat_name_{zutat_count}")
+                zutat_number = request.form.get(f"zutat_number_{zutat_count}")
+                zutat_einheit = request.form.get(f"zutat_einheit_{zutat_count}")
+                
+                if zutat_name:  # Only add if name is provided
+                    db_write("INSERT INTO zutaten (rezept_id, name, number, einheit) VALUES (%s, %s, %s, %s)", 
+                            (rezept_id, zutat_name, zutat_number, zutat_einheit))
+                zutat_count += 1
+        
         return redirect(url_for("rezepte_page"))
 
     # GET - List and search recipes
@@ -134,21 +156,36 @@ def rezepte_page():
 @app.route("/rezept/<int:rezept_id>", methods=["GET", "POST"])
 @login_required
 def rezept_detail(rezept_id):
-    # POST - Add ingredient
-    if request.method == "POST":
-        name = request.form["name"]
-        number = request.form.get("number")
-        einheit = request.form.get("einheit")
-        db_write("INSERT INTO zutaten (rezept_id, name, number, einheit) VALUES (%s, %s, %s, %s)", (rezept_id, name, number, einheit, ))
-        return redirect(url_for("rezept_detail", rezept_id=rezept_id))
-
     # GET - Show recipe details
-    rezept = db_read("SELECT id, name FROM rezepte WHERE user_id=%s AND id=%s", (current_user.id, rezept_id), single=True)
+    rezept = db_read("SELECT id, name, description FROM rezepte WHERE user_id=%s AND id=%s", (current_user.id, rezept_id), single=True)
     if not rezept:
         return "Rezept nicht gefunden", 404
     
-    zutaten = db_read("SELECT name, number, einheit FROM zutaten WHERE rezept_id=%s", (rezept_id,))
+    zutaten = db_read("SELECT id, name, number, einheit FROM zutaten WHERE rezept_id=%s", (rezept_id,))
     return render_template("rezept_detail.html", rezept=rezept, zutaten=zutaten)
+
+@app.post("/zutat/<int:zutat_id>/delete")
+@login_required
+def delete_zutat(zutat_id):
+    # Verify the ingredient belongs to a recipe owned by the current user
+    zutat = db_read("SELECT z.id, z.rezept_id FROM zutaten z JOIN rezepte r ON z.rezept_id = r.id WHERE z.id=%s AND r.user_id=%s", (zutat_id, current_user.id), single=True)
+    if zutat:
+        db_write("DELETE FROM zutaten WHERE id=%s", (zutat_id,))
+        return redirect(url_for("rezept_detail", rezept_id=zutat["rezept_id"]))
+    return "Zutat nicht gefunden", 404
+
+@app.post("/zutat/<int:zutat_id>/update")
+@login_required
+def update_zutat(zutat_id):
+    # Verify the ingredient belongs to a recipe owned by the current user
+    zutat = db_read("SELECT z.id, z.rezept_id FROM zutaten z JOIN rezepte r ON z.rezept_id = r.id WHERE z.id=%s AND r.user_id=%s", (zutat_id, current_user.id), single=True)
+    if zutat:
+        name = request.form.get("name")
+        number = request.form.get("number")
+        einheit = request.form.get("einheit")
+        db_write("UPDATE zutaten SET name=%s, number=%s, einheit=%s WHERE id=%s", (name, number, einheit, zutat_id))
+        return redirect(url_for("rezept_detail", rezept_id=zutat["rezept_id"]))
+    return "Zutat nicht gefunden", 404
 
 @app.route("/einkaufsliste", methods=["GET", "POST"])
 @login_required

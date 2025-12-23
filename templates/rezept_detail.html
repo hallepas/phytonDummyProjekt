@@ -6,55 +6,93 @@
     </div>
 
     <h1 style="margin-top: 20px;">{{ rezept.name }}</h1>
+    
+    {% if rezept.description %}
+    <p class="lead">{{ rezept.description }}</p>
+    {% endif %}
 
     <div class="panel panel-default" style="margin-top: 20px;">
         <div class="panel-heading">
             <h3 class="panel-title">Zutaten</h3>
         </div>
         <div class="panel-body">
-            <ul>
+            <ul style="list-style: none; padding: 0;">
                 {% for zutat in zutaten %}
-                    <li>
-                        {% if zutat.number %}
-                            {{ zutat.number }}
-                        {% endif %}
-                        {% if zutat.einheit %}
-                            {{ zutat.einheit }}
-                        {% endif %}
-                        <strong>{{ zutat.name }}</strong>
+                    <li style="margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 5px;">
+                        <div class="row">
+                            <div class="col-md-8">
+                                {% if zutat.number %}
+                                    {{ zutat.number }}
+                                {% endif %}
+                                {% if zutat.einheit %}
+                                    {{ zutat.einheit }}
+                                {% endif %}
+                                <strong>{{ zutat.name }}</strong>
+                            </div>
+                            <div class="col-md-4 text-right">
+                                <button class="btn btn-sm btn-primary" onclick="editZutat({{ zutat.id }}, '{{ zutat.name }}', '{{ zutat.number or '' }}', '{{ zutat.einheit or '' }}')">
+                                    Bearbeiten
+                                </button>
+                                <form action="{{ url_for('delete_zutat', zutat_id=zutat.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Zutat wirklich löschen?')">
+                                        Löschen
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </li>
                 {% else %}
-                    <li>Keine Zutaten hinzugefügt.</li>
+                    <li>Keine Zutaten vorhanden.</li>
                 {% endfor %}
             </ul>
         </div>
     </div>
 
-    <div class="todo-form">
-        <h3>Zutat hinzufügen</h3>
-        <form action="{{ url_for('rezept_detail', rezept_id=rezept.id) }}" method="POST">
-            <div class="form-group">
-                <label for="name">Name der Zutat</label>
-                <input type="text" id="name" name="name" class="form-control" 
-                       placeholder="z.B. Tomaten" required>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="number">Menge (optional)</label>
-                        <input type="number" id="number" name="number" class="form-control" 
-                               placeholder="z.B. 500">
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form id="editForm" method="POST">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Zutat bearbeiten</h4>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="einheit">Einheit (optional)</label>
-                        <input type="text" id="einheit" name="einheit" class="form-control" 
-                               placeholder="z.B. g, ml, Stück">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="edit_name">Name der Zutat</label>
+                            <input type="text" id="edit_name" name="name" class="form-control" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="edit_number">Menge</label>
+                                    <input type="number" id="edit_number" name="number" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="edit_einheit">Einheit</label>
+                                    <input type="text" id="edit_einheit" name="einheit" class="form-control">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+                        <button type="submit" class="btn btn-primary">Speichern</button>
+                    </div>
+                </form>
             </div>
-            <button type="submit" class="btn btn-primary">Zutat hinzufügen</button>
-        </form>
+        </div>
     </div>
+
+    <script>
+        function editZutat(id, name, number, einheit) {
+            document.getElementById('editForm').action = '{{ url_for("update_zutat", zutat_id=0) }}'.replace('0', id);
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_number').value = number;
+            document.getElementById('edit_einheit').value = einheit;
+            $('#editModal').modal('show');
+        }
+    </script>
 {% endblock %}
