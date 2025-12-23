@@ -190,8 +190,7 @@ def update_zutat(zutat_id):
 @app.route("/einkaufsliste", methods=["GET", "POST"])
 @login_required
 def einkaufsliste():
-    shopping_list = []
-    matched_rezept = None
+    matched_rezepte = []
     vorhandene_zutaten = []
     
     if request.method == "POST":
@@ -201,31 +200,43 @@ def einkaufsliste():
         
         if vorhandene_zutaten:
             # Get all user's recipes with their ingredients
-            user_rezepte = db_read("SELECT id, name FROM rezepte WHERE user_id=%s", (current_user.id,))
-            
-            best_match = None
-            best_match_count = 0
+            user_rezepte = db_read("SELECT id, name, description FROM rezepte WHERE user_id=%s", (current_user.id,))
             
             for rezept in user_rezepte:
                 rezept_zutaten = db_read("SELECT name, number, einheit FROM zutaten WHERE rezept_id=%s", (rezept["id"],))
                 
-                # Count how many ingredients match
-                match_count = sum(1 for z in rezept_zutaten if z["name"].lower() in vorhandene_zutaten)
+                if not rezept_zutaten:
+                    continue
                 
-                if match_count > best_match_count:
-                    best_match_count = match_count
-                    best_match = {"rezept": rezept, "zutaten": rezept_zutaten, "match_count": match_count}
+                # Count how many ingredients match
+                matching_zutaten = []
+                missing_zutaten = []
+                
+                for zutat in rezept_zutaten:
+                    if zutat["name"].lower() in vorhandene_zutaten:
+                        matching_zutaten.append(zutat)
+                    else:
+                        missing_zutaten.append(zutat)
+                
+                match_count = len(matching_zutaten)
+                total_count = len(rezept_zutaten)
+                match_percentage = (match_count / total_count * 100) if total_count > 0 else 0
+                
+                if match_count > 0:  # Only include recipes with at least one match
+                    matched_rezepte.append({
+                        "rezept": rezept,
+                        "match_count": match_count,
+                        "total_count": total_count,
+                        "match_percentage": match_percentage,
+                        "matching_zutaten": matching_zutaten,
+                        "missing_zutaten": missing_zutaten
+                    })
             
-            if best_match:
-                matched_rezept = best_match["rezept"]
-                # Calculate shopping list (ingredients not at home)
-                for zutat in best_match["zutaten"]:
-                    if zutat["name"].lower() not in vorhandene_zutaten:
-                        shopping_list.append(zutat)
+            # Sort by match count (descending), then by percentage
+            matched_rezepte.sort(key=lambda x: (x["match_count"], x["match_percentage"]), reverse=True)
     
     return render_template("einkaufsliste.html", 
-                         shopping_list=shopping_list, 
-                         matched_rezept=matched_rezept,
+                         matched_rezepte=matched_rezepte,
                          vorhandene_zutaten=", ".join(vorhandene_zutaten))
 
 

@@ -7,7 +7,7 @@
         <div class="panel-body">
             <p>
                 Gib die Zutaten ein, die du bereits zu Hause hast (kommagetrennt). 
-                Die App findet das beste passende Rezept und erstellt eine Einkaufsliste für die fehlenden Zutaten.
+                Die App zeigt dir alle passenden Rezepte, sortiert nach den meisten Übereinstimmungen, mit der Einkaufsliste für fehlende Zutaten.
             </p>
             <form action="{{ url_for('einkaufsliste') }}" method="POST">
                 <div class="form-group">
@@ -16,51 +16,81 @@
                               placeholder="z.B. Tomaten, Zwiebeln, Knoblauch, Olivenöl" required>{{ vorhandene_zutaten }}</textarea>
                     <p class="help-block">Trenne die Zutaten mit Komma.</p>
                 </div>
-                <button type="submit" class="btn btn-success">Rezept finden & Einkaufsliste erstellen</button>
+                <button type="submit" class="btn btn-success">Passende Rezepte finden</button>
             </form>
         </div>
     </div>
 
-    {% if matched_rezept %}
-        <div class="alert alert-success" style="margin-top: 30px;">
-            <h3>✅ Passendes Rezept gefunden: <strong>{{ matched_rezept.name }}</strong></h3>
-            <p>
-                <a href="{{ url_for('rezept_detail', rezept_id=matched_rezept.id) }}" class="btn btn-sm btn-info">
-                    Rezept ansehen
-                </a>
-            </p>
-        </div>
+    {% if matched_rezepte %}
+        <div style="margin-top: 30px;">
+            <h3>Passende Rezepte ({{ matched_rezepte|length }})</h3>
+            <p class="text-muted">Sortiert nach Anzahl vorhandener Zutaten</p>
 
-        {% if shopping_list %}
-            <div class="panel panel-warning" style="margin-top: 20px;">
-                <div class="panel-heading">
-                    <h3 class="panel-title">📝 Einkaufsliste</h3>
-                </div>
-                <div class="panel-body">
-                    <p>Folgende Zutaten musst du noch besorgen:</p>
-                    <ul>
-                        {% for zutat in shopping_list %}
-                            <li>
-                                {% if zutat.number %}
-                                    {{ zutat.number }}
+            {% for match in matched_rezepte %}
+                <div class="panel {% if match.match_percentage >= 80 %}panel-success{% elif match.match_percentage >= 50 %}panel-info{% else %}panel-warning{% endif %}" style="margin-top: 20px;">
+                    <div class="panel-heading">
+                        <h4 class="panel-title" style="margin: 0;">
+                            <a href="{{ url_for('rezept_detail', rezept_id=match.rezept.id) }}" style="color: inherit; text-decoration: none;">
+                                {{ match.rezept.name }}
+                            </a>
+                            <span class="pull-right">
+                                <span class="label {% if match.match_percentage >= 80 %}label-success{% elif match.match_percentage >= 50 %}label-info{% else %}label-warning{% endif %}">
+                                    {{ match.match_count }}/{{ match.total_count }} Zutaten ({{ "%.0f"|format(match.match_percentage) }}%)
+                                </span>
+                            </span>
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        {% if match.rezept.description %}
+                            <p><em>{{ match.rezept.description }}</em></p>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 style="color: green;">✓ Vorhandene Zutaten ({{ match.match_count }})</h5>
+                                <ul style="list-style: none; padding-left: 0;">
+                                    {% for zutat in match.matching_zutaten %}
+                                        <li style="color: green;">
+                                            ✓
+                                            {% if zutat.number %}{{ zutat.number }}{% endif %}
+                                            {% if zutat.einheit %}{{ zutat.einheit }}{% endif %}
+                                            {{ zutat.name }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 style="color: #d9534f;">📝 Einkaufsliste ({{ match.missing_zutaten|length }})</h5>
+                                {% if match.missing_zutaten %}
+                                    <ul style="list-style: none; padding-left: 0;">
+                                        {% for zutat in match.missing_zutaten %}
+                                            <li style="color: #d9534f;">
+                                                ✗
+                                                {% if zutat.number %}{{ zutat.number }}{% endif %}
+                                                {% if zutat.einheit %}{{ zutat.einheit }}{% endif %}
+                                                <strong>{{ zutat.name }}</strong>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p style="color: green;">Alle Zutaten vorhanden! 🎉</p>
                                 {% endif %}
-                                {% if zutat.einheit %}
-                                    {{ zutat.einheit }}
-                                {% endif %}
-                                <strong>{{ zutat.name }}</strong>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 10px;">
+                            <a href="{{ url_for('rezept_detail', rezept_id=match.rezept.id) }}" class="btn btn-sm btn-primary">
+                                Zum Rezept
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        {% else %}
-            <div class="alert alert-info" style="margin-top: 20px;">
-                <strong>Super!</strong> Du hast bereits alle Zutaten für dieses Rezept! 🎉
-            </div>
-        {% endif %}
+            {% endfor %}
+        </div>
     {% elif vorhandene_zutaten %}
         <div class="alert alert-warning" style="margin-top: 30px;">
-            <strong>Leider kein passendes Rezept gefunden.</strong>
+            <strong>Keine passenden Rezepte gefunden.</strong>
             <p>Versuche es mit anderen Zutaten oder füge neue Rezepte hinzu.</p>
         </div>
     {% endif %}

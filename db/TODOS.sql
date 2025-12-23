@@ -1,3 +1,9 @@
+-- Clean up existing data (if tables exist)
+DELETE FROM zutaten;
+DELETE FROM rezepte;
+ALTER TABLE rezepte AUTO_INCREMENT = 1;
+ALTER TABLE zutaten AUTO_INCREMENT = 1;
+
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(250) NOT NULL UNIQUE,
