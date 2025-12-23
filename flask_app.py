@@ -213,7 +213,17 @@ def einkaufsliste():
                 missing_zutaten = []
                 
                 for zutat in rezept_zutaten:
-                    if zutat["name"].lower() in vorhandene_zutaten:
+                    zutat_name_lower = zutat["name"].lower()
+                    is_match = False
+                    
+                    # Check for exact or partial matches
+                    for vorhanden in vorhandene_zutaten:
+                        # Match if either contains the other (handles singular/plural)
+                        if vorhanden in zutat_name_lower or zutat_name_lower in vorhanden:
+                            is_match = True
+                            break
+                    
+                    if is_match:
                         matching_zutaten.append(zutat)
                     else:
                         missing_zutaten.append(zutat)
