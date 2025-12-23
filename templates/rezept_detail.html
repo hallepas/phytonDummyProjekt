@@ -1,33 +1,60 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>{{ rezept.name }}</h1>
+    <div style="margin-top: 20px;">
+        <a href="{{ url_for('rezepte_page') }}" class="btn btn-default">← Zurück zu allen Rezepten</a>
+    </div>
 
-    <h2>Zutaten</h2>
-    <ul>
-        {% for zutat in zutaten %}
-            <li>{{ zutat.number }} {{ zutat.einheit }} {{ zutat.name }}</li>
-        {% else %}
-            <li>Keine Zutaten hinzugefügt.</li>
-        {% endfor %}
-    </ul>
+    <h1 style="margin-top: 20px;">{{ rezept.name }}</h1>
 
-    <hr>
+    <div class="panel panel-default" style="margin-top: 20px;">
+        <div class="panel-heading">
+            <h3 class="panel-title">Zutaten</h3>
+        </div>
+        <div class="panel-body">
+            <ul>
+                {% for zutat in zutaten %}
+                    <li>
+                        {% if zutat.number %}
+                            {{ zutat.number }}
+                        {% endif %}
+                        {% if zutat.einheit %}
+                            {{ zutat.einheit }}
+                        {% endif %}
+                        <strong>{{ zutat.name }}</strong>
+                    </li>
+                {% else %}
+                    <li>Keine Zutaten hinzugefügt.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
 
-    <h2>Zutat hinzufügen</h2>
-    <form action="{{ url_for('rezept_detail', rezept_id=rezept.id) }}" method="POST">
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="number">Anzahl</label>
-            <input type="number" id="number" name="number" class="form-control">
-        </div>
-        <div class="form-group">
-            <label for="einheit">Einheit</label>
-            <input type="text" id="einheit" name="einheit" class="form-control">
-        </div>
-        <button type="submit" class="btn btn-primary">Hinzufügen</button>
-    </form>
+    <div class="todo-form">
+        <h3>Zutat hinzufügen</h3>
+        <form action="{{ url_for('rezept_detail', rezept_id=rezept.id) }}" method="POST">
+            <div class="form-group">
+                <label for="name">Name der Zutat</label>
+                <input type="text" id="name" name="name" class="form-control" 
+                       placeholder="z.B. Tomaten" required>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="number">Menge (optional)</label>
+                        <input type="number" id="number" name="number" class="form-control" 
+                               placeholder="z.B. 500">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="einheit">Einheit (optional)</label>
+                        <input type="text" id="einheit" name="einheit" class="form-control" 
+                               placeholder="z.B. g, ml, Stück">
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Zutat hinzufügen</button>
+        </form>
+    </div>
 {% endblock %}

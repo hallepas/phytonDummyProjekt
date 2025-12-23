@@ -8,6 +8,7 @@ CREATE TABLE rezepte (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     name VARCHAR(250) NOT NULL,
+    description VARCHAR(250) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -19,3 +20,4 @@ CREATE TABLE zutaten (
     einheit VARCHAR(50),
     FOREIGN KEY (rezept_id) REFERENCES rezepte(id)
 );
+

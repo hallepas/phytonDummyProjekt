@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Meine Rezepte</h2>
+
+    <!-- Search form -->
+    <div class="panel panel-default" style="margin-top: 20px;">
+        <div class="panel-body">
+            <form action="{{ url_for('rezepte_page') }}" method="GET" class="form-inline">
+                <div class="form-group">
+                    <label for="search">Rezept suchen:</label>
+                    <input type="text" id="search" name="search" class="form-control" 
+                           placeholder="Rezeptname eingeben..." value="{{ search }}" style="width: 300px; margin-left: 10px;">
+                </div>
+                <button type="submit" class="btn btn-primary">Suchen</button>
+                {% if search %}
+                    <a href="{{ url_for('rezepte_page') }}" class="btn btn-default">Zurücksetzen</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Recipe list -->
+    <ul class="todo-list">
+        {% for rezept in rezepte %}
+            <li class="todo-item">
+                <a href="{{ url_for('rezept_detail', rezept_id=rezept.id) }}" style="text-decoration: none; color: inherit;">
+                    <strong>{{ rezept.name }}</strong>
+                </a>
+            </li>
+        {% else %}
+            <div class="alert alert-info">
+                {% if search %}
+                    Keine Rezepte mit "{{ search }}" gefunden.
+                {% else %}
+                    Noch keine Rezepte vorhanden. Füge dein erstes Rezept hinzu! 🎉
+                {% endif %}
+            </div>
+        {% endfor %}
+    </ul>
+
+    <!-- Add recipe form -->
+    <div class="todo-form">
+        <h3>Neues Rezept hinzufügen</h3>
+        <form action="{{ url_for('rezepte_page') }}" method="POST">
+            <div class="form-group">
+                <label for="name">Rezeptname</label>
+                <input type="text" id="name" name="name" class="form-control"
+                       placeholder="z.B. Spaghetti Bolognese" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Rezept hinzufügen</button>
+        </form>
+    </div>
+{% endblock %}

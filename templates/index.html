@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="jumbotron" style="margin-top: 30px;">
+        <h1>Willkommen bei deiner Rezeptsammlung! 🍳</h1>
+        <p class="lead">
+            Organisiere deine Lieblingsrezepte und plane deine Einkäufe intelligent.
+        </p>
+    </div>
+
+    <div class="row" style="margin-top: 30px;">
+        <div class="col-md-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">📚 Rezepte verwalten</h3>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        Sammle und organisiere alle deine Lieblingsrezepte an einem Ort.
+                        Füge für jedes Rezept die benötigten Zutaten mit Mengenangaben hinzu.
+                    </p>
+                    <p>
+                        Du kannst nach Rezepten suchen, neue hinzufügen und die Details jederzeit bearbeiten.
+                    </p>
+                    <a href="{{ url_for('rezepte_page') }}" class="btn btn-primary">Zu meinen Rezepten</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">🛒 Intelligente Einkaufsliste</h3>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        Gib einfach ein, welche Zutaten du bereits zu Hause hast. 
+                        Die App findet automatisch das beste passende Rezept aus deiner Sammlung.
+                    </p>
+                    <p>
+                        Du erhältst dann eine Einkaufsliste mit allen fehlenden Zutaten, 
+                        die du noch besorgen musst.
+                    </p>
+                    <a href="{{ url_for('einkaufsliste') }}" class="btn btn-success">Zur Einkaufsliste</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">💡 So funktioniert's</h3>
+                </div>
+                <div class="panel-body">
+                    <ol>
+                        <li><strong>Rezepte hinzufügen:</strong> Erstelle deine Rezepte mit Namen und allen benötigten Zutaten.</li>
+                        <li><strong>Vorräte eingeben:</strong> Gib die Zutaten ein, die du bereits zu Hause hast (kommagetrennt).</li>
+                        <li><strong>Rezept finden:</strong> Die App schlägt dir das beste passende Rezept vor.</li>
+                        <li><strong>Einkaufen gehen:</strong> Nutze die automatisch generierte Einkaufsliste für fehlende Zutaten.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

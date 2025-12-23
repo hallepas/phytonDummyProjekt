@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Intelligente Einkaufsliste 🛒</h2>
+
+    <div class="panel panel-default" style="margin-top: 20px;">
+        <div class="panel-body">
+            <p>
+                Gib die Zutaten ein, die du bereits zu Hause hast (kommagetrennt). 
+                Die App findet das beste passende Rezept und erstellt eine Einkaufsliste für die fehlenden Zutaten.
+            </p>
+            <form action="{{ url_for('einkaufsliste') }}" method="POST">
+                <div class="form-group">
+                    <label for="zutaten">Vorhandene Zutaten</label>
+                    <textarea id="zutaten" name="zutaten" class="form-control" rows="3" 
+                              placeholder="z.B. Tomaten, Zwiebeln, Knoblauch, Olivenöl" required>{{ vorhandene_zutaten }}</textarea>
+                    <p class="help-block">Trenne die Zutaten mit Komma.</p>
+                </div>
+                <button type="submit" class="btn btn-success">Rezept finden & Einkaufsliste erstellen</button>
+            </form>
+        </div>
+    </div>
+
+    {% if matched_rezept %}
+        <div class="alert alert-success" style="margin-top: 30px;">
+            <h3>✅ Passendes Rezept gefunden: <strong>{{ matched_rezept.name }}</strong></h3>
+            <p>
+                <a href="{{ url_for('rezept_detail', rezept_id=matched_rezept.id) }}" class="btn btn-sm btn-info">
+                    Rezept ansehen
+                </a>
+            </p>
+        </div>
+
+        {% if shopping_list %}
+            <div class="panel panel-warning" style="margin-top: 20px;">
+                <div class="panel-heading">
+                    <h3 class="panel-title">📝 Einkaufsliste</h3>
+                </div>
+                <div class="panel-body">
+                    <p>Folgende Zutaten musst du noch besorgen:</p>
+                    <ul>
+                        {% for zutat in shopping_list %}
+                            <li>
+                                {% if zutat.number %}
+                                    {{ zutat.number }}
+                                {% endif %}
+                                {% if zutat.einheit %}
+                                    {{ zutat.einheit }}
+                                {% endif %}
+                                <strong>{{ zutat.name }}</strong>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info" style="margin-top: 20px;">
+                <strong>Super!</strong> Du hast bereits alle Zutaten für dieses Rezept! 🎉
+            </div>
+        {% endif %}
+    {% elif vorhandene_zutaten %}
+        <div class="alert alert-warning" style="margin-top: 30px;">
+            <strong>Leider kein passendes Rezept gefunden.</strong>
+            <p>Versuche es mit anderen Zutaten oder füge neue Rezepte hinzu.</p>
+        </div>
+    {% endif %}
+{% endblock %}
