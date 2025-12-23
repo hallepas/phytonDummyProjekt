@@ -12,9 +12,11 @@
                         <div class="form-group">
                             <label for="search">Rezept suchen:</label>
                             <input type="text" id="search" name="search" class="form-control" 
-                                   placeholder="Rezeptname eingeben..." value="{{ search }}" style="width: 300px; margin-left: 10px;">
+                                   placeholder="Rezeptname eingeben..." value="{{ search }}" 
+                                   style="width: 300px; margin-left: 10px;"
+                                   oninput="filterRecipes()">
                         </div>
-                        <button type="submit" class="btn btn-primary">Suchen</button>
+                        <button type="submit" class="btn btn-primary" style="display: none;">Suchen</button>
                         {% if search %}
                             <a href="{{ url_for('rezepte_page') }}" class="btn btn-default">Zurücksetzen</a>
                         {% endif %}
@@ -30,15 +32,15 @@
     </div>
 
     <!-- Recipe list -->
-    <ul class="todo-list">
+    <ul class="todo-list" id="recipeList">
         {% for rezept in rezepte %}
-            <li class="todo-item">
+            <li class="todo-item recipe-item" data-name="{{ rezept.name|lower }}">
                 <a href="{{ url_for('rezept_detail', rezept_id=rezept.id) }}" style="text-decoration: none; color: inherit;">
                     <strong>{{ rezept.name }}</strong>
                 </a>
             </li>
         {% else %}
-            <div class="alert alert-info">
+            <div class="alert alert-info" id="noRecipesMessage">
                 {% if search %}
                     Keine Rezepte mit "{{ search }}" gefunden.
                 {% else %}
@@ -47,6 +49,35 @@
             </div>
         {% endfor %}
     </ul>
+    <div class="alert alert-info" id="noMatchMessage" style="display: none;">
+        Keine passenden Rezepte gefunden.
+    </div>
+
+    <script>
+        function filterRecipes() {
+            const searchInput = document.getElementById('search').value.toLowerCase();
+            const recipeItems = document.querySelectorAll('.recipe-item');
+            const noMatchMessage = document.getElementById('noMatchMessage');
+            let visibleCount = 0;
+            
+            recipeItems.forEach(item => {
+                const recipeName = item.getAttribute('data-name');
+                if (recipeName.includes(searchInput)) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Show/hide no match message
+            if (visibleCount === 0 && recipeItems.length > 0) {
+                noMatchMessage.style.display = 'block';
+            } else {
+                noMatchMessage.style.display = 'none';
+            }
+        }
+    </script>
 
     <!-- Add recipe form -->
     <div class="modal fade" id="addRecipeModal" tabindex="-1" role="dialog">
