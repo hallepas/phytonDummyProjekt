@@ -1,0 +1,18 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "hallepas.mysql.pythonanywhere-services.com",
+            "driver": "MySQL",
+            "name": "hallepasMySQL",
+            "database": "hallepas",
+            "username": "hallepas",
+            "connectString": "hallepas.mysql.pythonanywhere-services.com"
+        }
+    ]
+}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{{ rezept.name }}</h1>
+
+    <h2>Zutaten</h2>
+    <ul>
+        {% for zutat in zutaten %}
+            <li>{{ zutat.number }} {{ zutat.einheit }} {{ zutat.name }}</li>
+        {% else %}
+            <li>Keine Zutaten hinzugefügt.</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+
+    <h2>Zutat hinzufügen</h2>
+    <form action="{{ url_for('rezept_detail', rezept_id=rezept.id) }}" method="POST">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="number">Anzahl</label>
+            <input type="number" id="number" name="number" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="einheit">Einheit</label>
+            <input type="text" id="einheit" name="einheit" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Hinzufügen</button>
+    </form>
+{% endblock %}

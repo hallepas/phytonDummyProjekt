@@ -114,21 +114,33 @@ def logout():
 def index():
     # GET
     if request.method == "GET":
-        todos = db_read("SELECT id, content, due FROM todos WHERE user_id=%s ORDER BY due", (current_user.id,))
-        return render_template("main_page.html", todos=todos)
+        rezepte = db_read("SELECT id, name FROM rezepte WHERE user_id=%s", (current_user.id,))
+        return render_template("main_page.html", rezepte=rezepte)
 
     # POST
-    content = request.form["contents"]
-    due = request.form["due_at"]
-    db_write("INSERT INTO todos (user_id, content, due) VALUES (%s, %s, %s)", (current_user.id, content, due, ))
+    name = request.form["name"]
+    db_write("INSERT INTO rezepte (user_id, name) VALUES (%s, %s)", (current_user.id, name, ))
     return redirect(url_for("index"))
 
-@app.post("/complete")
+@app.route("/rezept/<int:rezept_id>", methods=["GET", "POST"])
 @login_required
-def complete():
-    todo_id = request.form.get("id")
-    db_write("DELETE FROM todos WHERE user_id=%s AND id=%s", (current_user.id, todo_id,))
-    return redirect(url_for("index"))
+def rezept_detail(rezept_id):
+    # POST
+    if request.method == "POST":
+        name = request.form["name"]
+        number = request.form["number"]
+        einheit = request.form["einheit"]
+        db_write("INSERT INTO zutaten (rezept_id, name, number, einheit) VALUES (%s, %s, %s, %s)", (rezept_id, name, number, einheit, ))
+        return redirect(url_for("rezept_detail", rezept_id=rezept_id))
+
+    # GET
+    rezept = db_read("SELECT id, name FROM rezepte WHERE user_id=%s AND id=%s", (current_user.id, rezept_id,), one=True)
+    if not rezept:
+        return "Rezept nicht gefunden", 404
+    
+    zutaten = db_read("SELECT name, number, einheit FROM zutaten WHERE rezept_id=%s", (rezept_id,))
+    return render_template("rezept_detail.html", rezept=rezept, zutaten=zutaten)
+
 
 if __name__ == "__main__":
     app.run()
