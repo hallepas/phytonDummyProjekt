@@ -134,7 +134,7 @@ def rezept_detail(rezept_id):
         return redirect(url_for("rezept_detail", rezept_id=rezept_id))
 
     # GET
-    rezept = db_read("SELECT id, name FROM rezepte WHERE user_id=%s AND id=%s", (current_user.id, rezept_id), one=True)
+    rezept = db_read("SELECT id, name FROM rezepte WHERE user_id=%s AND id=%s", (current_user.id, rezept_id), single=True)
     if not rezept:
         return "Rezept nicht gefunden", 404
     
